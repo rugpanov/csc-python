@@ -24,42 +24,33 @@
 ﻿Примечание. "(2 раза)" - это два раза повторить одну строку.
 """
 
-ANIMALS = ["курочка", "уточка", "индюшонок", "кисуня", "собачонка",
-           "коровёнка", "поросёнок", "телевизор"]
-
-ANIMALS_TO_BUY = {"курочка": "курочку",
-                  "уточка": "уточку",
-                  "индюшонок": "индюшонка",
-                  "кисуня": "кисоньку",
-                  "собачонка": "собачонку",
-                  "коровёнка": "коровёнку",
-                  "поросёнок": "поросёнка",
-                  "телевизор": "телевизор"}
-
-ANIMALS_TO_ACTION = {"курочка": "{animal} по зёрнышку кудах-тах-тах",
-                     "уточка": "{animal} та-ти-та-та",
-                     "индюшонок": "{animal} фалды-балды",
-                     "кисуня": "А {animal} мяу-мяу",
-                     "собачонка": "{animal} гав-гав",
-                     "коровёнка": "{animal} муки-муки",
-                     "поросёнок": "{animal} хрюки-хрюки",
-                     "телевизор": "{animal} надо, надо, ведь у нас такое стадо"}
+FIRST_FORM = 0
+TO_BUY_FORM = 1
+PHRASE_TEMPLATE = 2
+ANIMALS = [["курочка", "курочку", "{animal} по зёрнышку кудах-тах-тах"],
+           ["уточка", "уточку", "{animal} та-ти-та-та"],
+           ["индюшонок", "индюшонка", "{animal} фалды-балды"],
+           ["кисуня", "кисоньку", "А {animal} мяу-мяу"],
+           ["собачонка", "собачонку", "{animal} гав-гав"],
+           ["коровёнка", "коровёнку", "{animal} муки-муки"],
+           ["поросёнок", "поросёнка", "{animal} хрюки-хрюки"],
+           ["телевизор", "телевизор", "{animal} надо, надо, ведь у нас такое стадо"]]
 
 ASK_TO_BUY_TEMPLATE = "Бабушка, бабушка, купим {animal}!"
 TIMES_TO_REPEAT = 2
 LINE_BREAKER = "\n"
 
 
-def __ask_to_buy(animal, times):
+def __ask_to_buy(animal_i, times):
     result = ""
-    line = ASK_TO_BUY_TEMPLATE.format(animal=ANIMALS_TO_BUY[animal])
+    line = ASK_TO_BUY_TEMPLATE.format(animal=ANIMALS[animal_i][TO_BUY_FORM])
     for _ in range(0, times):
         result += line + LINE_BREAKER
     return result
 
 
-def __is_last_animal(animal_index):
-    return animal_index == len(ANIMALS) - 1
+def __is_last_index(index):
+    return index == len(ANIMALS) - 1
 
 
 def __ensure_capitalized(sub_string, target_string):
@@ -67,14 +58,13 @@ def __ensure_capitalized(sub_string, target_string):
         else target_string.replace(sub_string, sub_string.title())
 
 
-def __tell_actions(animal_i):
+def __tell_actions(current_animal_i):
     result = ""
-    for i in reversed(range(0, animal_i + 1)):
-        animal = ANIMALS[i]
-        action = ANIMALS_TO_ACTION[animal].format(animal=animal)
-        action = __ensure_capitalized(animal, action)
+    for i in reversed(range(0, current_animal_i + 1)):
+        action = ANIMALS[i][PHRASE_TEMPLATE].format(animal=ANIMALS[i][FIRST_FORM])
+        action = __ensure_capitalized(ANIMALS[i][FIRST_FORM], action)
         result += action
-        if __is_last_animal(animal_i):
+        if __is_last_index(i):
             result += "!"
             break
         result += ("," + LINE_BREAKER) if i else ("." + LINE_BREAKER)
@@ -87,9 +77,8 @@ def sing_song():
     """
 
     result = ""
-    for i, animal in enumerate(ANIMALS):
-        animal = ANIMALS[i]
-        result += __ask_to_buy(animal, TIMES_TO_REPEAT)
+    for i in range(0, len(ANIMALS)):
+        result += __ask_to_buy(i, TIMES_TO_REPEAT)
         result += __tell_actions(i)
         result += LINE_BREAKER
     return result.strip()
