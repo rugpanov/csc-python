@@ -1,71 +1,97 @@
-animals = ["курочка", "уточка", "индюшонок", "кисуня", "собачонка", "коровёнка", "поросёнок", "телевизор"]
+"""Песенка "Курочка по зёрнышку" (Im Radio ist ein Kucken)
+Текст песенки:
 
-animalToBuy = {"курочка": "курочку",
-               "уточка": "уточку",
-               "индюшонок": "индюшонка",
-               "кисуня": "кисоньку",
-               "собачонка": "собачонку",
-               "коровёнка": "коровёнку",
-               "поросёнок": "поросёнка",
-               "телевизор": "телевизор"}
+Бабушка, бабушка, купим курочку!
+Бабушка, бабушка, купим курочку!
+Курочка по зёрнышку кудах-тах-тах.
 
-animalToAction = {"курочка": "{animal} по зёрнышку кудах-тах-тах",
-                  "уточка": "{animal} та-ти-та-та",
-                  "индюшонок": "{animal} фалды-балды",
-                  "кисуня": "А {animal} мяу-мяу",
-                  "собачонка": "{animal} гав-гав",
-                  "коровёнка": "{animal} муки-муки",
-                  "поросёнок": "{animal} хрюки-хрюки",
-                  "телевизор": "{animal} надо, надо, ведь у нас такое стадо"}
+Бабушка, бабушка, купим уточку! (2 раза)
+Уточка та-ти-та-та,
+Курочка по зёрнышку кудах-тах-тах.
 
-askToBuyTemplate = "Бабушка, бабушка, купим {animal}!"
+Далее персонажи такие:
+
+...индюшонка - Индюшонок фалды-балды,
+...кисоньку - А кисуня мяу-мяу,
+...собачонку - Собачонка гав-гав,
+...коровёнку - Коровёнка муки-муки,
+...поросёнка - Поросёнок хрюки-хрюки,
+и заканчивается всё последним куплетом:
+
+Бабушка, бабушка, купим телевизор! (2 раза)
+Телевизор надо, надо, ведь у нас такое стадо!
+
+﻿Примечание. "(2 раза)" - это два раза повторить одну строку.
+"""
+
+ANIMALS = ["курочка", "уточка", "индюшонок", "кисуня", "собачонка",
+           "коровёнка", "поросёнок", "телевизор"]
+
+ANIMALS_TO_BUY = {"курочка": "курочку",
+                  "уточка": "уточку",
+                  "индюшонок": "индюшонка",
+                  "кисуня": "кисоньку",
+                  "собачонка": "собачонку",
+                  "коровёнка": "коровёнку",
+                  "поросёнок": "поросёнка",
+                  "телевизор": "телевизор"}
+
+ANIMALS_TO_ACTION = {"курочка": "{animal} по зёрнышку кудах-тах-тах",
+                     "уточка": "{animal} та-ти-та-та",
+                     "индюшонок": "{animal} фалды-балды",
+                     "кисуня": "А {animal} мяу-мяу",
+                     "собачонка": "{animal} гав-гав",
+                     "коровёнка": "{animal} муки-муки",
+                     "поросёнок": "{animal} хрюки-хрюки",
+                     "телевизор": "{animal} надо, надо, ведь у нас такое стадо"}
+
+ASK_TO_BUY_TEMPLATE = "Бабушка, бабушка, купим {animal}!"
+TIMES_TO_REPEAT = 2
+LINE_BREAKER = "\n"
 
 
-def ask_to_buy(animal, times):
+def __ask_to_buy(animal, times):
     result = ""
-    line = askToBuyTemplate.format(animal=animalToBuy[animal])
-    for i in range(0, times):
-        result += line + "\n"
+    line = ASK_TO_BUY_TEMPLATE.format(animal=ANIMALS_TO_BUY[animal])
+    for _ in range(0, times):
+        result += line + LINE_BREAKER
     return result
 
 
-def is_last_animal(animal_index):
-    return animal_index == len(animals) - 1
+def __is_last_animal(animal_index):
+    return animal_index == len(ANIMALS) - 1
 
 
-def ensure_animal_first_upper_case(animal, animal_action):
-    if animal_action.find(animal) == 0:
-        return animal_action.replace(animal, animal.title())
-    return animal_action
+def __ensure_capitalized(sub_string, target_string):
+    return target_string if target_string.find(sub_string) \
+        else target_string.replace(sub_string, sub_string.title())
 
 
-def tell_actions(animal_index):
-    if is_last_animal(animal_index):
-        animal = animals[animal_index]
-        animal_action = animalToAction[animal].format(animal=animal) + "!"
-        return ensure_animal_first_upper_case(animal, animal_action)
-
+def __tell_actions(animal_i):
     result = ""
-    for sub_index in reversed(range(0, animal_index + 1)):
-        animal = animals[sub_index]
-        animal_action = animalToAction[animal].format(animal=animal)
-        animal_action = ensure_animal_first_upper_case(animal, animal_action)
-
-        result += animal_action
-        if sub_index != 0:
-            result += ",\n"
-        else:
-            result += ".\n"
+    for i in reversed(range(0, animal_i + 1)):
+        animal = ANIMALS[i]
+        action = ANIMALS_TO_ACTION[animal].format(animal=animal)
+        action = __ensure_capitalized(animal, action)
+        result += action
+        if __is_last_animal(animal_i):
+            result += "!"
+            break
+        result += ("," + LINE_BREAKER) if i else ("." + LINE_BREAKER)
     return result
 
 
 def sing_song():
+    """
+    "Пропеть" песенку "Курочка по зёрнышку"
+    """
+
     result = ""
-    for animalIndex in range(0, len(animals)):
-        animal = animals[animalIndex]
-        result += ask_to_buy(animal, 2)
-        result += tell_actions(animalIndex)
-        result += "\n"
+    for i, animal in enumerate(ANIMALS):
+        animal = ANIMALS[i]
+        result += __ask_to_buy(animal, TIMES_TO_REPEAT)
+        result += __tell_actions(i)
+        result += LINE_BREAKER
     return result.strip()
 
 
