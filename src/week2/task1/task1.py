@@ -6,11 +6,20 @@
 """
 RUSSIAN_ALPHABET = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуф' \
                    'хцчшщъыьэюя'
-LETTERS_TO_CHANGE_ORDER = "Ёё"
-
-SORTED_ALPHABET = ""
+SORTED_ALPHABET = {}
 ANY_ALPHABET_CODE = -1
 REPLACED_CHARS_NUMBER = 0
+
+
+def __create_dict(alphabet):
+    global SORTED_ALPHABET, ANY_ALPHABET_CODE, REPLACED_CHARS_NUMBER
+    ANY_ALPHABET_CODE = ord(alphabet[0])
+    current_code = ord(alphabet[0])
+    for char in alphabet:
+        SORTED_ALPHABET[char] = current_code
+        if ord(char) != current_code:
+            REPLACED_CHARS_NUMBER += 1
+        current_code += 1
 
 
 def use_russian_alphabet():
@@ -18,10 +27,7 @@ def use_russian_alphabet():
     Настраивает глобальные параметры,
     используемые в alphabetic_key и alphabetic_less
     """
-    global SORTED_ALPHABET, ANY_ALPHABET_CODE, REPLACED_CHARS_NUMBER
-    SORTED_ALPHABET = RUSSIAN_ALPHABET
-    ANY_ALPHABET_CODE = ord(SORTED_ALPHABET[0])
-    REPLACED_CHARS_NUMBER = len(LETTERS_TO_CHANGE_ORDER)
+    __create_dict(RUSSIAN_ALPHABET)
 
 
 def alphabetic_less(string1, string2):
@@ -31,22 +37,23 @@ def alphabetic_less(string1, string2):
     return alphabetic_key(string1) < alphabetic_key(string2)
 
 
+def __char_to_key(char):
+    index_in_alphabet = SORTED_ALPHABET.get(char)
+    if index_in_alphabet is None:
+        code = ord(char)
+        if code > ANY_ALPHABET_CODE:
+            return chr(code + REPLACED_CHARS_NUMBER)
+        else:
+            return char
+    else:
+        return chr(index_in_alphabet)
+
+
 def alphabetic_key(string):
     """
     Возвращает некий ключ, такой, что
     (alphabetic_key(string1) < alphabetic_key(string2)) == \
     alphabetic_less(string1, string2)
     """
-
-    builder = []
-    for char in string:
-        code = ord(char)
-        index_in_alphabet = SORTED_ALPHABET.find(char)
-        if index_in_alphabet == -1:
-            if code > ANY_ALPHABET_CODE:
-                builder.append(chr(code + REPLACED_CHARS_NUMBER))
-            else:
-                builder.append(char)
-        else:
-            builder.append(chr(ANY_ALPHABET_CODE + index_in_alphabet))
+    builder = [__char_to_key(char) for char in string]
     return "".join(builder)
